@@ -1,0 +1,19 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Template for scheduling scrapping products Lambda functions
+Resources:
+  ScheduledScrappingTask:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: python3.9
+      Handler: app.task_handler
+      CodeUri: ./src
+      Timeout: 180
+      Events:
+        RateSchedule:
+          Properties:
+            Description: Schedule for scrapping products
+            Enabled: true
+            Name: products-scrapping-schedule
+            Schedule: rate(3 minutes)
+          Type: Schedule
