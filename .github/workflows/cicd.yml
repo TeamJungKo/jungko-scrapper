@@ -1,0 +1,50 @@
+name: Scrapepr CI/CD
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  scrapper-CI:
+    name: CI for Scrapepr SAM application
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Setup SAM
+        uses: aws-actions/setup-sam@v2
+        with:
+          sam-version: latest
+
+      - name: AWS SAM Build
+        run: |
+          sam build --use-container --template template.yaml --manifest requirements.txt
+
+      - name: Setup AWS credentials
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: AWS SAM Package
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          sam package --template-file .aws-sam/build/template.yaml --output-template-file packaged.yml --s3-bucket ${{ secrets.S3_DEPLOY_BUCKET }}
+
+      - name: AWS SAM Deploy
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          sam deploy --template-file packaged.yml --stack-name ${{ secrets.STACK_NAME }} --capabilities CAPABILITY_IAM --region ${{ secrets.AWS_REGION }} --no-confirm-changeset --no-fail-on-empty-changeset
