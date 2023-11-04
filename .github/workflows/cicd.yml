@@ -25,7 +25,7 @@ jobs:
       - name: Setup SAM
         uses: aws-actions/setup-sam@v2
         with:
-          sam-version: latest
+          use-installer: true
 
       - name: AWS SAM Build
         run: |
