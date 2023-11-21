@@ -1,0 +1,3 @@
+[submodule "scrapper-config"]
+    path = scrapper-config
+    url = git@github.com:TeamJungKo/scrapper-config.git
