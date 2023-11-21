@@ -1,19 +1,53 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
-Description: Template for scheduling scrapping products Lambda functions
+Description: Template for scheduling scrapping products and send notifications step functions
 Resources:
-  ScheduledScrappingTask:
+  ProductNotificationStateMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      DefinitionUri: statemachine/product_notifier.asl.json
+      DefinitionSubstitutions:
+        ScrapProductInfoFunctionArn: !GetAtt ScrapProductInfoFunction.Arn
+        ExtractKeywordsFunctionArn: !GetAtt ExtractKeywordsFunction.Arn
+        SendNotificationFunctionArn: !GetAtt SendNotificationFunction.Arn
+
+      Events:
+        ScheduledEvent:
+          Type: Schedule
+          Properties:
+            Description: Schedule for scrapping products and send notifications
+            Enabled: false
+            Name: products-scrapping-notification-schedule
+            Schedule: rate(3 minutes)
+
+      Policies:
+        - LambdaInvokePolicy:
+            FunctionName: !Ref ScrapProductInfoFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref ExtractKeywordsFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref SendNotificationFunction
+
+  ScrapProductInfoFunction:
     Type: AWS::Serverless::Function
     Properties:
       Runtime: python3.9
       Handler: app.task_handler
-      CodeUri: ./src
+      CodeUri: ./functions/product-scrapper
       Timeout: 180
-      Events:
-        RateSchedule:
-          Properties:
-            Description: Schedule for scrapping products
-            Enabled: true
-            Name: products-scrapping-schedule
-            Schedule: rate(3 minutes)
-          Type: Schedule
+
+  ExtractKeywordsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: python3.9
+      Handler: app.task_handler
+      CodeUri: ./functions/keyword-extractor
+      Timeout: 180
+
+  SendNotificationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: python3.9
+      Handler: app.task_handler
+      CodeUri: ./functions/notification-sender
+      Timeout: 180

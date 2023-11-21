@@ -1,0 +1,21 @@
+{
+  "Comment": "A state machine that scrap product info and send notification to user",
+  "StartAt": "ScrapProductInfo",
+  "States": {
+    "ScrapProductInfo": {
+      "Type": "Task",
+      "Resource": "${ScrapProductInfoFunctionArn}",
+      "Next": "ExtractKeywords"
+    },
+    "ExtractKeywords": {
+      "Type": "Task",
+      "Resource": "${ExtractKeywordsFunctionArn}",
+      "Next": "SendNotification"
+    },
+    "SendNotification": {
+      "Type": "Task",
+      "Resource": "${SendNotificationFunctionArn}",
+      "End": true
+    }
+  }
+}
