@@ -1,6 +1,17 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: Template for scheduling scrapping products and send notifications step functions
+
+Globals:
+  Function:
+    Environment:
+      Variables:
+        MARIADB_HOST: !Ref MARIADB_HOST
+        MARIADB_USER: !Ref MARIADB_USER
+        MARIADB_PASSWORD: !Ref MARIADB_PASSWORD
+        MARIADB_DATABASE: !Ref MARIADB_DATABASE
+        MARIADB_PORT: !Ref MARIADB_PORT
+
 Resources:
   ProductNotificationStateMachine:
     Type: AWS::Serverless::StateMachine
