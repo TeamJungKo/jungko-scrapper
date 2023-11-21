@@ -24,19 +24,19 @@ You may need the following for local testing.
 To build and deploy your application for the first time, run the following in your shell:
 
 ```bash
-aws configure --profile jungko-scrapper
+aws configure --profile jungko
 ```
 
 ```bash
-sam build --template template.yaml --manifest requirements.txt
+sam build --template template.yaml
 ```
 
 ```bash
-sam package --template-file .aws-sam/build/template.yaml --output-template-file packaged.yml --s3-bucket jungko-scrapper-deploy-main --profile jungko-scrapper
+sam package --template-file .aws-sam/build/template.yaml --output-template-file packaged.yml --s3-bucket jungko-scrapper-deploy-main --profile jungko
 ```
 
 ```bash
-sam deploy --template-file packaged.yml --stack-name scheduled-scrapping-task --capabilities CAPABILITY_IAM --profile jungko-scrapper
+sam deploy --template-file packaged.yml --stack-name scheduled-scrapping-task --capabilities CAPABILITY_IAM --profile jungko
 ```
 
 The first command will build a docker image from a Dockerfile and then copy the source of your application inside the Docker image. The second command will package and deploy your application to AWS, with a series of prompts:
@@ -52,7 +52,7 @@ The first command will build a docker image from a Dockerfile and then copy the 
 Build your application with the `sam build` command.
 
 ```bash
-jungko-scrapper$ sam build --template template.yaml --manifest requirements.txt
+jungko-scrapper$ sam build --template template.yaml
 ```
 
 The SAM CLI builds a docker image from a Dockerfile and then installs dependencies defined in `requirements.txt` inside the docker image. The processed template file is saved in the `.aws-sam/build` folder.
@@ -62,7 +62,13 @@ Test a single function by invoking it directly with a test event. An event is a 
 Run functions locally and invoke them with the `sam local invoke` command.
 
 ```bash
-jungko-scrapper$ sam local invoke ScheduledScrappingTask --event events/event.json --template .aws-sam/build/template.yaml
+jungko-scrapper$ sam local invoke ScrapProductInfoFunction --event events/event.json --template .aws-sam/build/template.yaml
+```
+
+If you doesn't login to ECR, you can login with the following command.
+
+```bash
+jungko-scrapper$ aws --profile jungko ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
 ```
 
 You can add `--skip-pull-image` to skip pulling down the latest Docker image for Lambda from ECR.
@@ -81,7 +87,7 @@ jungko-scrapper$ python -m pytest tests/ -v
 To delete the sample application that you created, use the AWS CLI. Assuming you used your project name for the stack name, you can run the following:
 
 ```bash
-sam delete --stack-name "scheduled-scrapping-task" --profile jungko-scrapper
+aws cloudformation delete-stack --stack-name "scheduled-scrapping-task" --profile jungko
 ```
 
 ## Resources
