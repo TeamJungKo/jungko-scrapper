@@ -9,10 +9,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo '${{ secrets.SSH_CONFIG }}' | base64 -d > ~/.ssh/id_rsa
+          chmod 400 ~/.ssh/id_rsa
+
       - name: Checkout
         uses: actions/checkout@v3
         with:
           submodules: recursive
+        run: |
+          git submodule update --init scrapper-config
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -26,7 +34,7 @@ jobs:
 
       - name: AWS SAM Build
         run: |
-          cp scrapper-config/template-local.yaml template.yaml
+          cp scrapper-config/template-main.yaml template.yaml
           sam build --template template.yaml
 
       - name: Setup AWS credentials
