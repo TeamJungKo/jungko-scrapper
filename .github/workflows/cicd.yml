@@ -9,7 +9,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
@@ -22,6 +26,7 @@ jobs:
 
       - name: AWS SAM Build
         run: |
+          cp scrapper-config/template-local.yaml template.yaml
           sam build --template template.yaml
 
       - name: Setup AWS credentials
