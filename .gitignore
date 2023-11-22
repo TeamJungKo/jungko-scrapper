@@ -246,3 +246,8 @@ packaged.yml
 # End of https://www.gitignore.io/api/osx,linux,python,windows,pycharm,visualstudiocode
 
 .aws-sam
+
+env.json
+
+template-*.yaml
+template.yaml
