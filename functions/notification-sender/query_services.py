@@ -26,13 +26,11 @@ def find_all_areas(connection: pymysql.Connection) -> dict:
 """
 
 
-def create_notifications_for_new_product_subscribers(connection: pymysql.Connection, areas: dict) -> list:
+def create_notifications_for_new_product_subscribers(connection: pymysql.Connection, areas: dict) -> list[Notification]:
     with connection.cursor(pymysql.cursors.DictCursor) as cursor:
-        # TODO: device_token 추가
         cursor.execute("""
-            SELECT m.id, m.nickname, m.email,
-
-                       p.title, ik.keyword, p.area_id
+            SELECT m.id, m.nickname, m.email, m.device_token,
+                p.title, ik.keyword, p.area_id, p.id as product_id
             FROM member m
                     INNER JOIN interested_keyword ik ON m.id = ik.member_id
                     INNER JOIN product_keyword pk ON ik.keyword = pk.keyword
@@ -45,8 +43,34 @@ def create_notifications_for_new_product_subscribers(connection: pymysql.Connect
             target_member_id=raw_data['id'],
             target_member_nickname=raw_data['nickname'],
             target_member_email=raw_data['email'],
-            # device_token=raw_data['device_token'],
+            device_token=raw_data['device_token'],
             notice_title=f"[{raw_data['keyword']} 키워드 알림] {areas[raw_data['area_id']]}",
             notice_content=raw_data['title'],
+            product_id=raw_data['product_id']
         ) for raw_data in new_products]
         return notifications
+
+
+def save_notifications(connection: pymysql.Connection, notifications: list[Notification]):
+    notification_dicts = [
+        {
+            'notice_title': notification.notice_title,
+            'notice_content': notification.notice_content,
+            'product_id': notification.product_id,
+            'target_member_id': notification.target_member_id
+        } for notification in notifications
+    ]
+    with connection.cursor(pymysql.cursors.DictCursor) as cursor:
+        cursor.executemany("""
+            INSERT INTO notification (title, content, product_id, is_read, created_at, member_id)
+            VALUES (%(notice_title)s, %(notice_content)s, %(product_id)s, false, now(), %(target_member_id)s);
+        """, notification_dicts)
+        connection.commit()
+
+
+def set_product_is_new(connection: pymysql.Connection, is_new: bool):
+    with connection.cursor(pymysql.cursors.DictCursor) as cursor:
+        cursor.execute("""
+            UPDATE product SET is_new=%s WHERE is_new != %s;
+        """, (is_new, is_new))
+        connection.commit()
