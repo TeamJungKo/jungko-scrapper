@@ -43,7 +43,7 @@ def find_category_dang(category_name: str):
 # DB에 없는 읍면동이라면 해당 상품은 저장 제외 => crawler에서 로직 구현
 def find_area(connection: pymysql.Connection, emd_name: str):
     with connection.cursor() as cursor:
-        sql = f"SELECT id FROM emd_area WHERE name = %s"
+        sql = "SELECT id FROM emd_area WHERE name = %s"
         cursor.execute(sql, emd_name)
         result = cursor.fetchone()
         return int(result[0]) if result else 0
@@ -72,10 +72,10 @@ def create_product(product_info: dict, market_product_id: int, market_name: str)
 
 
 # created_at, updated_at, is_new는 어떻게?
-def save_product(connection: pymysql.Connection, data):
+def save_product(connection: pymysql.Connection, data: dict):
     with connection.cursor() as cursor:
         sql = """
-        INSERT INTO product (availabilty, content, created_at, image_url, market_name, market_product_id, price, title, uploaded_at, area_id, product_category_id, is_new) 
+        INSERT INTO product (availability, content, created_at, image_url, market_name, market_product_id, price, title, uploaded_at, area_id, product_category_id, is_new) 
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         cursor.execute(sql, ('ON_SALE', data['content'], data['created_at'], data['imageUrl'], data['market_name'], data['market_product_id'], data['price'],

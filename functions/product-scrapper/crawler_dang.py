@@ -59,32 +59,27 @@ def extract_data_from_link(connection: pymysql.Connection, link):
     # 이미지 url 추출
     imageUrl_tag = soup.find('img', class_='portrait')
     imageUrl = imageUrl_tag['src']
-    print(imageUrl)
 
     # 지역 추출 => but 그냥 string임 어케 id로 match? => split하고 뒷부분이랑 name이랑 매치
     # ex) 남구 야음장생포동 / 화성시 동탄6동
     area = soup.find('div', id='region-name').text
+    area = area.split()[1]
     area_id = find_area(connection, area)
-    print(area_id)
 
     # 제목 추출
     title = soup.find('h1', id='article-title').text
-    print(title)
 
     # 카테고리 추출 => 마찬가지로 그냥 string인데 어떻게 match? => string 값으로 매치?,,,
     # ex) 스포츠/레저 / 남성패션/잡화
     category = soup.find('p', id='article-category').text
     category_id = find_category_dang(category)
-    print(category_id)
 
     # 가격 추출
     price_tag = soup.find('p', id='article-price')
     price = price_tag['content']
-    print(price)
 
     # 내용 추출
     content = soup.find('div', id='article-detail').text
-    print(content)
 
     return {
         'imageUrl': imageUrl,
