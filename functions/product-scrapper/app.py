@@ -5,7 +5,6 @@ from crawler_dang import crawl_dang
 
 
 def task_handler(event, context):
-
     try:
         connection = create_connection()
         print('DB Connection created')
@@ -13,7 +12,7 @@ def task_handler(event, context):
         print('Connection started')
 
         crawl_dang(connection)
-        print("당근 시작~~")
+        print("당근 끝~~")
 
     except Exception as e:
         print(e)
