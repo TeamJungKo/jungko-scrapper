@@ -27,8 +27,8 @@ def crawl_dang(connection: pymysql.Connection):
 
             # DB에서 market_product_id 조회 후 중복시 해당 루프 스킵
             if (is_market_product_id_onDB(connection, market_product_id)):
-                print('Skup this product : Already on DB => ' +
-                      market_product_id + '\n\n\n\n')
+                print('Skip this product : Already on DB => ' +
+                      market_product_id + '\n\n')
                 continue
 
             # 링크로 접근하여 데이터 추출
@@ -36,11 +36,8 @@ def crawl_dang(connection: pymysql.Connection):
 
             # 만약 읍면동 조회 불가라면 해당 루프 스킵
             if (article_data['area'] == 0):
-                print('Skip this product : No area Info in DB' + '\n\n\n\n')
+                print('Skip this product : No area Info in DB' + '\n\n')
                 continue
-
-            if (article_data['title'] == 0 or article_data['content'] == 0):
-                print('Skip this product : Crawling error' + '\n\n\n\n')
 
             # 데이터 종합해서 product 생성
             product = create_product(
@@ -49,7 +46,7 @@ def crawl_dang(connection: pymysql.Connection):
 
             # DB에 product 생성
             save_product(connection, product)
-            print("Successfully Saved" + '\n\n\n\n')
+            print("Successfully Saved" + '\n\n')
 
 
 # hot_articles에 있는 링크를 인자로 받아서 해당 링크에서 데이터 추출
