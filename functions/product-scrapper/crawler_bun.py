@@ -23,7 +23,7 @@ def crawl_bun(connection: pymysql.Connection):
 
 def extract_data(connection: pymysql.Connection, categoryId):
     url = 'https://api.bunjang.co.kr/api/1/find_v2.json?f_category_id=' + categoryId + \
-        '&page=0&order=date&req_ref=popular_category&request_id=20231203171516&stat_device=w&n=100&version=4'
+        '&page=0&order=date&req_ref=popular_category&request_id=20231203171516&stat_device=w&n=10&version=4'
     req = requests.get(url)
     raw_data = req.json()
     data = raw_data['list']
