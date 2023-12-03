@@ -84,6 +84,371 @@ def find_category_dang(category_name: str):
         return 1
 
 
+def find_category_jung(categoryNum):
+    # 수입품
+    if categoryNum == '101':
+        return 18
+    elif categoryNum == '102':
+        return 19
+    elif categoryNum == '103':
+        return 25
+    elif categoryNum == '104':
+        return 28
+    elif categoryNum == '105':
+        return 2
+    elif categoryNum == '106':
+        return 10
+    elif categoryNum == '107':
+        return 48
+    elif categoryNum == '108':
+        return 108
+    elif categoryNum == '109':
+        return 169
+    elif categoryNum == '110':
+        return 1
+
+    # 패션의류
+    elif categoryNum == '111':
+        return 2
+    elif categoryNum == '112':
+        return 10
+    elif categoryNum == '113':
+        return 9
+
+    # 패션잡화
+    elif categoryNum == '114':
+        return 20
+    elif categoryNum == '115':
+        return 18
+    elif categoryNum == '116':
+        return 19
+    elif categoryNum == '117':
+        return 25
+    elif categoryNum == '118':
+        return 28
+    elif categoryNum == '119':
+        return 34
+    elif categoryNum == '120':
+        return 29
+    elif categoryNum == '121':
+        return 42
+    elif categoryNum == '122':
+        return 41
+    elif categoryNum == '123':
+        return 48
+
+    # 뷰티
+    elif categoryNum == '124':
+        return 121
+    elif categoryNum == '125':
+        return 122
+    elif categoryNum == '126':
+        return 127
+    elif categoryNum == '127':
+        return 124
+    elif categoryNum == '128':
+        return 125
+    elif categoryNum == '129':
+        return 126
+    elif categoryNum == '130':
+        return 129
+    elif categoryNum == '131':
+        return 127
+
+    # 출산/유아동
+    elif categoryNum == '132':
+        return 167
+    elif categoryNum == '133':
+        return 168
+    elif categoryNum == '134':
+        return 169
+    elif categoryNum == '135':
+        return 170
+    elif categoryNum == '136':
+        return 171
+    elif categoryNum == '137':
+        return 172
+    elif categoryNum == '138':
+        return 173
+
+    # 모바일/태블릿
+    elif categoryNum == '139':
+        return 50
+    elif categoryNum == '140':
+        return 51
+    elif categoryNum == '141':
+        return 52
+    elif categoryNum == '142':
+        return 53
+    elif categoryNum == '143':
+        return 54
+    elif categoryNum == '144':
+        return 55
+    elif categoryNum == '145':
+        return 56
+
+    # 가전제품
+    elif categoryNum == '147':
+        return 82
+    elif categoryNum == '148':
+        return 83
+    elif categoryNum == '149':
+        return 84
+    elif categoryNum == '150':
+        return 85
+    elif categoryNum == '151':
+        return 86
+    elif categoryNum == '152':
+        return 87
+    elif categoryNum == '153':
+        return 87
+    elif categoryNum == '154':
+        return 88
+    elif categoryNum == '155':
+        return 89
+    elif categoryNum == '156':
+        return 90
+    elif categoryNum == '157':
+        return 92
+
+    # 노트북/PC
+    elif categoryNum == '158':
+        return 58
+    elif categoryNum == '159':
+        return 59
+    elif categoryNum == '160':
+        return 60
+    elif categoryNum == '161':
+        return 61
+    elif categoryNum == '162':
+        return 62
+    elif categoryNum == '163':
+        return 63
+    elif categoryNum == '164':
+        return 64
+    elif categoryNum == '165':
+        return 65
+    elif categoryNum == '166':
+        return 66
+    elif categoryNum == '167':
+        return 67
+    elif categoryNum == '168':
+        return 68
+    elif categoryNum == '169':
+        return 69
+    elif categoryNum == '170':
+        return 70
+
+    # 카메라
+    elif categoryNum == '171':
+        return 72
+    elif categoryNum == '172':
+        return 73
+    elif categoryNum == '173':
+        return 74
+    elif categoryNum == '174':
+        return 75
+    elif categoryNum == '175':
+        return 76
+    elif categoryNum == '176':
+        return 77
+    elif categoryNum == '177':
+        return 78
+    elif categoryNum == '178':
+        return 79
+    elif categoryNum == '179':
+        return 80
+
+    # 가구/인테리어
+    elif categoryNum == '180':
+        return 132
+    elif categoryNum == '181':
+        return 131
+    elif categoryNum == '182':
+        return 133
+    elif categoryNum == '183':
+        return 135
+    elif categoryNum == '184':
+        return 134
+    elif categoryNum == '185':
+        return 135
+    elif categoryNum == '186':
+        return 132
+    elif categoryNum == '187':
+        return 138
+    elif categoryNum == '188':
+        return 136
+    elif categoryNum == '189':
+        return 140
+    elif categoryNum == '190':
+        return 140
+    elif categoryNum == '191':
+        return 140
+    elif categoryNum == '192':
+        return 141
+    elif categoryNum == '193':
+        return 142
+
+    # 리빙/생활
+    elif categoryNum == '194':
+        return 144
+    elif categoryNum == '195':
+        return 157
+    elif categoryNum == '196':
+        return 145
+    elif categoryNum == '197':
+        return 146
+    elif categoryNum == '198':
+        return 146
+    elif categoryNum == '199':
+        return 143
+    elif categoryNum == '246':
+        return 210
+
+    # 게임
+    elif categoryNum == '200':
+        return 99
+    elif categoryNum == '201':
+        return 99
+    elif categoryNum == '202':
+        return 99
+    elif categoryNum == '203':
+        return 99
+    elif categoryNum == '204':
+        return 99
+    elif categoryNum == '205':
+        return 99
+    elif categoryNum == '206':
+        return 99
+    elif categoryNum == '207':
+        return 99
+
+    # 반려동물/취미
+    elif categoryNum == '208':
+        return 174
+    elif categoryNum == '209':
+        return 94
+    elif categoryNum == '210':
+        return 100
+    elif categoryNum == '211':
+        return 107
+    elif categoryNum == '212':
+        return 106
+    elif categoryNum == '213':
+        return 101
+
+    # 도서/음반/문구
+    elif categoryNum == '214':
+        return 112
+    elif categoryNum == '215':
+        return 112
+    elif categoryNum == '216':
+        return 112
+    elif categoryNum == '217':
+        return 112
+    elif categoryNum == '218':
+        return 112
+    elif categoryNum == '219':
+        return 112
+    elif categoryNum == '220':
+        return 212
+    elif categoryNum == '221':
+        return 112
+    elif categoryNum == '222':
+        return 113
+    elif categoryNum == '223':
+        return 114
+
+    # 티켓/쿠폰
+    elif categoryNum == '224':
+        return 116
+    elif categoryNum == '225':
+        return 117
+    elif categoryNum == '226':
+        return 118
+    elif categoryNum == '227':
+        return 119
+
+    # 스포츠
+    elif categoryNum == '228':
+        return 188
+    elif categoryNum == '229':
+        return 192
+    elif categoryNum == '230':
+        return 195
+    elif categoryNum == '231':
+        return 189
+    elif categoryNum == '232':
+        return 190
+    elif categoryNum == '233':
+        return 191
+    elif categoryNum == '234':
+        return 197
+    elif categoryNum == '235':
+        return 194
+    elif categoryNum == '236':
+        return 200
+    elif categoryNum == '237':
+        return 199
+    elif categoryNum == '238':
+        return 201
+    elif categoryNum == '239':
+        return 202
+
+    # 레저/여행
+    elif categoryNum == '240':
+        return 205
+    elif categoryNum == '241':
+        return 203
+    elif categoryNum == '242':
+        return 204
+    elif categoryNum == '243':
+        return 206
+
+    # 오토바이
+    elif categoryNum == '247':
+        return 211
+    elif categoryNum == '248':
+        return 211
+    elif categoryNum == '249':
+        return 212
+
+    # 공구/산업용품
+    elif categoryNum == '250':
+        return 148
+    elif categoryNum == '251':
+        return 154
+    elif categoryNum == '252':
+        return 151
+    elif categoryNum == '253':
+        return 152
+    elif categoryNum == '254':
+        return 152
+    elif categoryNum == '255':
+        return 156
+    elif categoryNum == '256':
+        return 156
+    elif categoryNum == '257':
+        return 156
+    elif categoryNum == '258':
+        return 153
+    elif categoryNum == '259':
+        return 150
+    elif categoryNum == '260':
+        return 151
+    elif categoryNum == '261':
+        return 155
+
+    # 중고차
+    elif categoryNum == '1349':
+        return 208
+    elif categoryNum == '1350':
+        return 209
+
+    else:   # 기타 중고물품
+        return 1
+
+
 def find_category_bun(categoryNum):
 
     # 여성의류
@@ -469,5 +834,5 @@ def find_category_bun(categoryNum):
     elif categoryNum == '980999':
         return 178
 
-    else:   # 포함되지 않는 물품들 (부동산, 아르바이트 등)
-        return 0
+    else:   # 포함되지 않는 물품들 (부동산, 아르바이트 등)은 기타로 분류
+        return 1

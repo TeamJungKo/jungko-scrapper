@@ -34,15 +34,17 @@ def crawl_dang(connection: pymysql.Connection):
             # 링크로 접근하여 데이터 추출
             article_data = extract_data_from_link(connection, link)
 
-            # 만약 읍면동 조회 불가라면 해당 루프 스킵
-            if (article_data['area'] == 0):
-                print('Skip this product : No area Info in DB' + '\n\n')
-                continue
-
             # 데이터 종합해서 product 생성
             product = create_product(
                 article_data, market_product_id, market_name)
             print('Successfully Created')
+
+            print(product)
+
+            # 만약 읍면동 조회 불가라면 해당 루프 스킵
+            if (article_data['area'] == 0):
+                print('Skip this product : No area Info in DB' + '\n\n')
+                continue
 
             # DB에 product 생성
             save_product(connection, product)
@@ -86,14 +88,6 @@ def extract_data_from_link(connection: pymysql.Connection, link):
 
     # 내용 추출
     content = soup.find('div', id='article-detail').text
-
-    print('\n' + '제목 : ' + title + '\n')
-    print('내용 : ' + content)
-    print('가격 : ' + str(price) + '\n')
-    print('지역 : ' + area + '\n')
-    print('지역 코드 : ' + str(area_id) + '\n')
-    print('카테고리 : ' + category + '\n')
-    print('카테고리 코드 : ' + str(category_id) + '\n')
 
     return {
         'imageUrl': imageUrl,
