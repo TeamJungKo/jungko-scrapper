@@ -11,22 +11,23 @@ from dataclasses import dataclass
 """
 
 
-# TODO: device_token 추가
 @dataclass
 class Notification:
     target_member_id: int
     target_member_nickname: str
     target_member_email: str
-    # device_token: str
+    device_token: str
     notice_title: str
     notice_content: str
+    product_id: int
 
     def to_dict(self) -> dict:
         return {
             'target_member_id': self.target_member_id,
             'target_member_nickname': self.target_member_nickname,
             'target_member_email': self.target_member_email,
-            # 'device_token': self.device_token,
+            'device_token': self.device_token,
             'notice_title': self.notice_title,
             'notice_content': self.notice_content,
+            'product_id': self.product_id
         }
