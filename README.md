@@ -1,97 +1,71 @@
-# jungko-scrapper
+# JungkoScrapper
 
-This project contains source code and supporting files for a serverless application that you can deploy with the SAM CLI. It includes the following files and folders.
+모든 중고거래 마켓을 한 곳에 보는 "중코거래" 서비스의 스크래퍼 프로젝트입니다.
 
-- src - Code for the application's Lambda function.
-- events - Invocation events that you can use to invoke the function in local environment.
-- tests - Unit tests for the application code.
-- template.yaml - A template that defines the application's AWS resources.
-- samconfig.toml - SAM CLI configuration file, which stores default parameters for commands that you use with the SAM CLI.
+AWS Step Functions를 이용하여 주기적으로 상품 정보 스크래핑을 수행하고, 키워드를 추출한 뒤 회원들에게 키워드 알림을 보내는 기능을 수행합니다.
 
-## Deploy this Application
+## Prerequisites
 
-The Serverless Application Model Command Line Interface (SAM CLI) is an extension of the AWS CLI that adds functionality for building and testing Lambda applications. It uses Docker to run your functions in an Amazon Linux environment that matches Lambda. It can also emulate your application's build environment and API.
+- Docker Desktop 설치가 필요합니다.
+  https://www.docker.com/products/docker-desktop/
+- AWS CLI 설치가 필요합니다.
+  https://docs.aws.amazon.com/ko_kr/cli/latest/userguide/cli-chap-install.html
+- AWS SAM CLI 설치가 필요합니다.
+  https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html
+- 중코거래 서버 프로젝트와 클라이언트 프로젝트가 실행되어 있다고 가정합니다.
 
-To use the SAM CLI, you need the following tools.
+  서버 프로젝트 레포지토리: https://github.com/TeamJungKo/jungko-server
+  클라이언트 프로젝트 레포지토리: https://github.com/TeamJungKo/jungko-client
 
-- SAM CLI - [Install the SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
-- Docker - [Install Docker community edition](https://hub.docker.com/search/?type=edition&offering=community)
-
-You may need the following for local testing.
-
-- [Python 3 installed](https://www.python.org/downloads/)
-
-To build and deploy your application for the first time, run the following in your shell:
+## Build and Deploy
 
 ```bash
 aws configure --profile jungko
 ```
 
+aws configure 명령어를 통해 AWS CLI를 설정합니다. AWS Access Key ID, AWS Secret Access Key, Default region name, Default output format을 입력합니다.
+
 ```bash
 sam build --template template.yaml
 ```
+
+⚠️ 중코거래 프로젝트 팀원이 아니라면 template.yaml.example 파일을 참고하여 template.yaml 파일을 생성해야 합니다.
+
+sam build 명령어를 통해 AWS Lambda Function 들을 빌드합니다.
 
 ```bash
 sam package --template-file .aws-sam/build/template.yaml --output-template-file packaged.yml --s3-bucket jungko-scrapper-deploy-main --profile jungko
 ```
 
+sam package 명령어를 통해 빌드된 AWS Lambda Function 들을 S3에 업로드합니다.
+
 ```bash
 sam deploy --template-file packaged.yml --stack-name scheduled-scrapping-task --capabilities CAPABILITY_IAM --profile jungko
 ```
 
-The first command will build a docker image from a Dockerfile and then copy the source of your application inside the Docker image. The second command will package and deploy your application to AWS, with a series of prompts:
+sam deploy 명령어를 통해 S3에 업로드된 AWS Lambda Function 들을 CloudFormation을 통해 배포합니다.
 
-- **Stack Name**: The name of the stack to deploy to CloudFormation. This should be unique to your account and region, and a good starting point would be something matching your project name.
-- **AWS Region**: The AWS region you want to deploy your app to.
-- **Confirm changes before deploy**: If set to yes, any change sets will be shown to you before execution for manual review. If set to no, the AWS SAM CLI will automatically deploy application changes.
-- **Allow SAM CLI IAM role creation**: Many AWS SAM templates, including this example, create AWS IAM roles required for the AWS Lambda function(s) included to access AWS services. By default, these are scoped down to minimum required permissions. To deploy an AWS CloudFormation stack which creates or modifies IAM roles, the `CAPABILITY_IAM` value for `capabilities` must be provided. If permission isn't provided through this prompt, to deploy this example you must explicitly pass `--capabilities CAPABILITY_IAM` to the `sam deploy` command.
-- **Save arguments to samconfig.toml**: If set to yes, your choices will be saved to a configuration file inside the project, so that in the future you can just re-run `sam deploy` without parameters to deploy changes to your application.
-
-## Use the SAM CLI to build and test locally
-
-Build your application with the `sam build` command.
+## Local development
 
 ```bash
-jungko-scrapper$ sam build --template template.yaml
+sam local invoke ScrapProductInfoFunction --event events/event.json --template .aws-sam/build/template.yaml
 ```
 
-The SAM CLI builds a docker image from a Dockerfile and then installs dependencies defined in `requirements.txt` inside the docker image. The processed template file is saved in the `.aws-sam/build` folder.
-
-Test a single function by invoking it directly with a test event. An event is a JSON document that represents the input that the function receives from the event source. Test events are included in the `events` folder in this project.
-
-Run functions locally and invoke them with the `sam local invoke` command.
+sam local invoke 명령어를 통해 로컬에서 컨테이너 환경 위에 AWS Lambda Function을 실행할 수 있습니다.
+sam local invoke의 인자로 실행할 AWS Lambda Function의 이름과 이벤트 파일을 전달합니다.
 
 ```bash
-jungko-scrapper$ sam local invoke ScrapProductInfoFunction --event events/event.json --template .aws-sam/build/template.yaml
+aws --profile jungko ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
 ```
 
-If you doesn't login to ECR, you can login with the following command.
+ECR에 로그인되어 있지 않다면 위 명령어를 통해 public ECR에 로그인이 필요합니다.
 
-```bash
-jungko-scrapper$ aws --profile jungko ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
-```
-
-You can add `--skip-pull-image` to skip pulling down the latest Docker image for Lambda from ECR.
-
-## Unit tests
-
-Tests are defined in the `tests` folder in this project. Use PIP to install the [pytest](https://docs.pytest.org/en/latest/) and run unit tests from your local machine.
-
-```bash
-jungko-scrapper$ pip install pytest pytest-mock --user
-jungko-scrapper$ python -m pytest tests/ -v
-```
+`--skip-pull-image` 인자를 통해 이미지 pull을 생략할 수 있습니다.
 
 ## Cleanup
-
-To delete the sample application that you created, use the AWS CLI. Assuming you used your project name for the stack name, you can run the following:
 
 ```bash
 aws cloudformation delete-stack --stack-name "scheduled-scrapping-task" --profile jungko
 ```
 
-## Resources
-
-See the [AWS SAM developer guide](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html) for an introduction to SAM specification, the SAM CLI, and serverless application concepts.
-
-Next, you can use AWS Serverless Application Repository to deploy ready to use Apps that go beyond hello world samples and learn how authors developed their applications: [AWS Serverless Application Repository main page](https://aws.amazon.com/serverless/serverlessrepo/)
+다음 명령어를 통해 배포된 CloudFormation Stack을 삭제할 수 있습니다.
