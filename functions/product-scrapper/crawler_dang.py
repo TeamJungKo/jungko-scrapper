@@ -56,6 +56,10 @@ def extract_data_from_link(connection: pymysql.Connection, link):
     response = requests.get(link)
     soup = BeautifulSoup(response.content, 'html.parser')
 
+    # 비밀 게시물 예외 처리
+    if soup.find('p', id='no-article'):
+        return {'area': 0}
+
     # 이미지 url 추출
     imageUrl_tag = soup.find('img', class_='portrait')
     if imageUrl_tag == None:
@@ -95,5 +99,6 @@ def extract_data_from_link(connection: pymysql.Connection, link):
         'title': title,
         'category': category_id,
         'price': price,
-        'content': content
+        'content': content,
+        'product_link': link
     }

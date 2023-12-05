@@ -22,8 +22,9 @@ def crawl_bun(connection: pymysql.Connection):
 
 
 def extract_data(connection: pymysql.Connection, categoryId):
+    # url의 n=?를 통해서 crawl할 갯수 지정
     url = 'https://api.bunjang.co.kr/api/1/find_v2.json?f_category_id=' + categoryId + \
-        '&page=0&order=date&req_ref=popular_category&request_id=20231203171516&stat_device=w&n=10&version=4'
+        '&page=0&order=date&req_ref=popular_category&request_id=20231203171516&stat_device=w&n=5&version=4'
     req = requests.get(url)
     raw_data = req.json()
     data = raw_data['list']
@@ -36,6 +37,9 @@ def extract_data(connection: pymysql.Connection, categoryId):
     for product in data:
         # 마켓 Id 추출
         market_product_id = product['pid']
+
+        # 상품 링크
+        link = 'https://m.bunjang.co.kr/products/' + market_product_id
 
         # 이미지 url 추출
         imageUrl = product['product_image']
@@ -64,7 +68,8 @@ def extract_data(connection: pymysql.Connection, categoryId):
             'title': title,
             'category': category_id,
             'price': price,
-            'content': content
+            'content': content,
+            'product_link': link
         }
 
         # DB에서 market_product_id 조회 후 중복시 해당 루프 스킵

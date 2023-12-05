@@ -19,74 +19,92 @@ def crawl_jung(connection: pymysql.Connection):
 def extract_data(connection: pymysql.Connection, categoryId):
     categoryNum = str(categoryId)
 
-    url = 'https://web.joongna.com/_next/data/5vLYEQ5wI7xPDg2f6IWK5/search.json?category=' + \
-        categoryNum + '&page=1'
-    req = requests.get(url)
-    raw_data = req.json()
-    products = raw_data['pageProps']['dehydratedState']['queries'][0]['state']['data']['data']['items']
-
-    market_name = '중고나라'
-
     # 카테고리 정보는 결정난 상태이므로 바로 할당
     category_id = find_category_jung(categoryNum)
 
-    for product in products[:8]:
-        # 마켓 Id 추출
-        market_product_id = product['seq']
+    market_name = '중고나라'
 
-        # 이미지 url 추출
-        imageUrl = product['url']
+    url = 'https://web.joongna.com/search?category=' + categoryNum + '&page=1'
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content, 'html.parser')
 
-        # 제목 추출
-        title = product['title']
+    product_warpper = soup.find(
+        'ul', class_='grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-x-3 lg:gap-x-5 xl:gap-x-7 gap-y-3 xl:gap-y-5 2xl:gap-y-8 search-results')
 
-        # 가격 추출
-        price = product['price']
+    if product_warpper == None:
+        return
 
-        # 지역 추출
-        raw_area = product['mainLocationName']
-        if raw_area == '':
-            area = '불명'
-            area_id = 0
-        else:
-            area = raw_area
-            area_id = find_area(connection, raw_area)
+    articles = product_warpper.find_all('a')
 
-        # 내용 추출
-        content = ''
+    for article in articles[:3]:
+        link = article['href']
 
-        product_info = {
-            'imageUrl': imageUrl,
-            'area': area_id,
-            'title': title,
-            'category': category_id,
-            'price': price,
-            'content': content
-        }
+        # 중간에 섞여있는 광고 스킵
+        if (link.split('/')[1] != 'product'):
+            continue
+
+        # 마켓 ID 추출 후 데이터 추출을 위해 링크 재할당
+        market_product_id = link.split('/')[-1]
+        link = 'https://web.joongna.com' + link
 
         # DB에서 market_product_id 조회 후 중복시 해당 루프 스킵
         if (is_market_product_id_onDB(connection, market_product_id)):
             print('Skip this product : Already on DB => ' +
-                  str(market_product_id) + '\n\n')
+                  market_product_id + '\n\n')
             continue
 
-        # 데이터로 product 생성
+        # 지역 추출
+        raw_area = article.find('span', class_='text-sm text-gray-400').text
+        if raw_area == '':
+            area = '불명'
+            print('Skip this product : No area Info in DB => ' + area + '\n\n')
+            continue
+        else:
+            area = raw_area.split()[-1]
+            area_id = find_area(connection, area)
+
+        if area_id == 0:
+            print('Skip this product : No area Info in DB => ' + area + '\n\n')
+            continue
+
+        product_info = get_product_info(link)
+        product_info['area'] = area_id
+        product_info['category'] = category_id
+        product_info['product_link'] = link
+
+        # 데이터 종합해서 product 생성
         product = create_product(
             product_info, market_product_id, market_name)
         print('Successfully Created')
 
         print(product)
 
-        # 물건 이외의 카테고리라면 해당 루프 스킵
-        if (category_id == 0):
-            print('Skip this product : This is not product' + '\n\n')
-            continue
-
-        # 만약 읍면동 조회 불가라면 해당 루프 스킵
-        if (area_id == 0):
-            print('Skip this product : No area Info in DB => ' + area + '\n\n')
-            continue
-
         # DB에 product 생성
         save_product(connection, product)
         print("Successfully Saved" + '\n\n')
+
+
+def get_product_info(link):
+    response = requests.get(link)
+    soup = BeautifulSoup(response.content, 'html.parser')
+
+    img_tag = soup.find('meta', property='og:image')
+    imageUrl = img_tag['content']
+
+    title_tag = soup.find('meta', property='og:title')
+    title = title_tag['content']
+
+    price_info = soup.find(
+        'div', class_='text-heading font-bold text-[40px] pe-2 md:pe-0 lg:pe-2 2xl:pe-0 mr-2').text
+    price_info = price_info[:-1]
+    price = int(price_info.replace(',', ''))
+
+    content = soup.find(
+        'p', class_='px-4 py-10 break-words break-all whitespace-pre-line lg:py-2').text
+
+    return {
+        'imageUrl': imageUrl,
+        'title': title,
+        'price': price,
+        'content': content
+    }
