@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import pymysql
-from db_services import find_category_bun, find_area, is_market_product_id_onDB, create_product, save_product
+from db_services import find_category_bun, find_area, is_market_product_id_onDB, create_product, save_product_list
 
 
 def crawl_bun(connection: pymysql.Connection):
@@ -18,7 +18,11 @@ def crawl_bun(connection: pymysql.Connection):
                 category_list.append(subCategory['id'])
 
     for category in category_list:
-        extract_data(connection, category)
+        try:
+            extract_data(connection, category)
+        except Exception as e:
+            print(e)
+            continue
 
 
 def extract_data(connection: pymysql.Connection, categoryId):
@@ -34,6 +38,7 @@ def extract_data(connection: pymysql.Connection, categoryId):
     # 카테고리 정보는 결정난 상태이므로 바로 할당
     category_id = find_category_bun(categoryId)
 
+    product_list = []
     for product in data:
         # 마켓 Id 추출
         market_product_id = product['pid']
@@ -83,8 +88,6 @@ def extract_data(connection: pymysql.Connection, categoryId):
             product_info, market_product_id, market_name)
         print('Successfully Created')
 
-        print(product)
-
         # 물건 이외의 카테고리라면 해당 루프 스킵
         if (category_id == 0):
             print('Skip this product : This is not product' + '\n\n')
@@ -95,6 +98,10 @@ def extract_data(connection: pymysql.Connection, categoryId):
             print('Skip this product : No area Info in DB => ' + area + '\n\n')
             continue
 
-        # DB에 product 생성
-        save_product(connection, product)
-        print("Successfully Saved" + '\n\n')
+        # # DB에 product 생성
+        # save_product(connection, product)
+        # print("Successfully Saved" + '\n\n')
+        product_list.append(product)
+
+    # DB에 product 생성
+    save_product_list(connection, product_list)

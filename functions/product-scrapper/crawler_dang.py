@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import pymysql
-from db_services import find_area, find_category_dang, is_market_product_id_onDB, create_product, save_product
+from db_services import find_area, find_category_dang, is_market_product_id_onDB, create_product, save_product_list
 
 
 def crawl_dang(connection: pymysql.Connection):
@@ -16,39 +16,47 @@ def crawl_dang(connection: pymysql.Connection):
 
     # 각 'card-top' 아티클의 'a' 태그 찾기
     articles = cards_wrap.find_all('article', class_='card-top')
+
+    product_list = []
     for article in articles:
-        a_tag = article.find('a')
-        if a_tag and 'href' in a_tag.attrs:
-            link = a_tag['href']
+        try:
+            a_tag = article.find('a')
+            if a_tag and 'href' in a_tag.attrs:
+                link = a_tag['href']
 
-            # 추출한 데이터 처리에 market_product_id 추가 => DB에서 string
-            market_product_id = link.split('/')[2]
-            link = 'https://www.daangn.com' + link
+                # 추출한 데이터 처리에 market_product_id 추가 => DB에서 string
+                market_product_id = link.split('/')[2]
+                link = 'https://www.daangn.com' + link
 
-            # DB에서 market_product_id 조회 후 중복시 해당 루프 스킵
-            if (is_market_product_id_onDB(connection, market_product_id)):
-                print('Skip this product : Already on DB => ' +
-                      market_product_id + '\n\n')
-                continue
+                # DB에서 market_product_id 조회 후 중복시 해당 루프 스킵
+                if (is_market_product_id_onDB(connection, market_product_id)):
+                    print('Skip this product : Already on DB => ' +
+                          market_product_id + '\n\n')
+                    continue
 
-            # 링크로 접근하여 데이터 추출
-            article_data = extract_data_from_link(connection, link)
+                # 링크로 접근하여 데이터 추출
+                article_data = extract_data_from_link(connection, link)
 
-            # 데이터 종합해서 product 생성
-            product = create_product(
-                article_data, market_product_id, market_name)
-            print('Successfully Created')
+                # 데이터 종합해서 product 생성
+                product = create_product(
+                    article_data, market_product_id, market_name)
+                print('Successfully Created')
 
-            print(product)
+                # 만약 읍면동 조회 불가라면 해당 루프 스킵
+                if (article_data['area'] == 0):
+                    print('Skip this product : No area Info in DB' + '\n\n')
+                    continue
 
-            # 만약 읍면동 조회 불가라면 해당 루프 스킵
-            if (article_data['area'] == 0):
-                print('Skip this product : No area Info in DB' + '\n\n')
-                continue
+                # # DB에 product 생성
+                # save_product(connection, product)
+                # print("Successfully Saved" + '\n\n')
+                product_list.append(product)
+        except Exception as e:
+            print(e)
+            continue
 
-            # DB에 product 생성
-            save_product(connection, product)
-            print("Successfully Saved" + '\n\n')
+    # DB에 product 생성
+    save_product_list(connection, product_list)
 
 
 # hot_articles에 있는 링크를 인자로 받아서 해당 링크에서 데이터 추출
