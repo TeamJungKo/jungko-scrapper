@@ -1,19 +1,25 @@
 import requests
 from bs4 import BeautifulSoup
 import pymysql
-from db_services import find_category_jung, find_area, is_market_product_id_onDB, create_product, save_product
+from db_services import find_category_jung, find_area, is_market_product_id_onDB, create_product, save_product_list
 
 
 def crawl_jung(connection: pymysql.Connection):
     # 카테고리 리스트 생성 146,245, 246 제외 101 ~ 261 + 1349, 1350 포함
-    category_list = list(range(101, 262))
-    category_list.remove(146)
+    # category_list = list(range(101, 262))
+    # category_list.remove(146)
+    category_list = list(range(201, 262))
     category_list.remove(244)
     category_list.remove(245)
     category_list.extend([1349, 1350])
 
+    product_list: list[dict] = []
     for category in category_list:
-        extract_data(connection, category)
+        extracted_product_list = extract_data(connection, category)
+        product_list.extend(extracted_product_list)
+
+    # DB에 product 생성
+    save_product_list(connection, product_list)
 
 
 def extract_data(connection: pymysql.Connection, categoryId):
@@ -36,52 +42,59 @@ def extract_data(connection: pymysql.Connection, categoryId):
 
     articles = product_warpper.find_all('a')
 
-    for article in articles[:3]:
-        link = article['href']
+    product_list: list[dict] = []
 
-        # 중간에 섞여있는 광고 스킵
-        if (link.split('/')[1] != 'product'):
-            continue
+    try:
+        for article in articles[:2]:
+            link = article['href']
 
-        # 마켓 ID 추출 후 데이터 추출을 위해 링크 재할당
-        market_product_id = link.split('/')[-1]
-        link = 'https://web.joongna.com' + link
+            # 중간에 섞여있는 광고 스킵
+            if (link.split('/')[1] != 'product'):
+                continue
 
-        # DB에서 market_product_id 조회 후 중복시 해당 루프 스킵
-        if (is_market_product_id_onDB(connection, market_product_id)):
-            print('Skip this product : Already on DB => ' +
-                  market_product_id + '\n\n')
-            continue
+            # 마켓 ID 추출 후 데이터 추출을 위해 링크 재할당
+            market_product_id = link.split('/')[-1]
+            link = 'https://web.joongna.com' + link
 
-        # 지역 추출
-        raw_area = article.find('span', class_='text-sm text-gray-400').text
-        if raw_area == '':
-            area = '불명'
-            print('Skip this product : No area Info in DB => ' + area + '\n\n')
-            continue
-        else:
-            area = raw_area.split()[-1]
-            area_id = find_area(connection, area)
+            # DB에서 market_product_id 조회 후 중복시 해당 루프 스킵
+            if (is_market_product_id_onDB(connection, market_product_id)):
+                print('Skip this product : Already on DB => ' +
+                      market_product_id + '\n\n')
+                continue
 
-        if area_id == 0:
-            print('Skip this product : No area Info in DB => ' + area + '\n\n')
-            continue
+            # 지역 추출
+            raw_area = article.find(
+                'span', class_='text-sm text-gray-400').text
+            if raw_area == '':
+                area = '불명'
+                print('Skip this product : No area Info in DB => ' + area + '\n\n')
+                continue
+            else:
+                area = raw_area.split()[-1]
+                area_id = find_area(connection, area)
 
-        product_info = get_product_info(link)
-        product_info['area'] = area_id
-        product_info['category'] = category_id
-        product_info['product_link'] = link
+            if area_id == 0:
+                print('Skip this product : No area Info in DB => ' + area + '\n\n')
+                continue
 
-        # 데이터 종합해서 product 생성
-        product = create_product(
-            product_info, market_product_id, market_name)
-        print('Successfully Created')
+            product_info = get_product_info(link)
+            product_info['area'] = area_id
+            product_info['category'] = category_id
+            product_info['product_link'] = link
 
-        print(product)
+            # 데이터 종합해서 product 생성
+            product = create_product(
+                product_info, market_product_id, market_name)
+            print('Successfully Created')
 
-        # DB에 product 생성
-        save_product(connection, product)
-        print("Successfully Saved" + '\n\n')
+            # # DB에 product 생성
+            # save_product(connection, product)
+            product_list.append(product)
+    except Exception as e:
+        print(e)
+        pass
+
+    return product_list
 
 
 def get_product_info(link):

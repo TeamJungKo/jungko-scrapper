@@ -33,16 +33,53 @@ def create_product(product_info: dict, market_product_id: int, market_name: str)
     return product_info
 
 
-# created_at, updated_at, is_new는 어떻게?
-def save_product(connection: pymysql.Connection, data: dict):
+# # created_at, updated_at, is_new는 어떻게?
+# def save_product(connection: pymysql.Connection, data: dict):
+#     with connection.cursor() as cursor:
+#         sql = """
+#         INSERT INTO product (availability, content, created_at, image_url, market_name, market_product_id, price, title, uploaded_at, area_id, product_category_id, is_new, market_product_url)
+#         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+#         """
+#         cursor.execute(sql, ('ON_SALE', data['content'], data['created_at'], data['imageUrl'], data['market_name'], data['market_product_id'], data['price'],
+#                        data['title'], data['uploaded_at'], data['area'], data['category'], True, data['product_link']))
+#         connection.commit()
+
+# with connection.cursor(pymysql.cursors.DictCursor) as cursor:
+#         cursor.executemany("""
+#             INSERT INTO notification (title, content, product_id, is_read, created_at, member_id)
+#             VALUES (%(notice_title)s, %(notice_content)s, %(product_id)s, false, now(), %(target_member_id)s);
+#         """, notification_dicts)
+#         connection.commit()
+
+def save_product_list(connection: pymysql.Connection, data: list[dict]):
     with connection.cursor() as cursor:
         sql = """
         INSERT INTO product (availability, content, created_at, image_url, market_name, market_product_id, price, title, uploaded_at, area_id, product_category_id, is_new, market_product_url)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
-        cursor.execute(sql, ('ON_SALE', data['content'], data['created_at'], data['imageUrl'], data['market_name'], data['market_product_id'], data['price'],
-                       data['title'], data['uploaded_at'], data['area'], data['category'], True, data['product_link']))
+        # Prepare data for insertion
+        values_to_insert = []
+        for item in data:
+            values_to_insert.append((
+                'ON_SALE',
+                item['content'],
+                item['created_at'],
+                item['imageUrl'],
+                item['market_name'],
+                item['market_product_id'],
+                item['price'],
+                item['title'],
+                item['uploaded_at'],
+                item['area'],
+                item['category'],
+                True,
+                item['product_link']
+            ))
+
+        # Execute SQL command
+        cursor.executemany(sql, values_to_insert)
         connection.commit()
+
 
 # 당근인 경우 카테고리
 
