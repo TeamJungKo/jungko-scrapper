@@ -37,11 +37,11 @@ def create_product(product_info: dict, market_product_id: int, market_name: str)
 def save_product(connection: pymysql.Connection, data: dict):
     with connection.cursor() as cursor:
         sql = """
-        INSERT INTO product (availability, content, created_at, image_url, market_name, market_product_id, price, title, uploaded_at, area_id, product_category_id, is_new) 
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO product (availability, content, created_at, image_url, market_name, market_product_id, price, title, uploaded_at, area_id, product_category_id, is_new, market_product_url)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         cursor.execute(sql, ('ON_SALE', data['content'], data['created_at'], data['imageUrl'], data['market_name'], data['market_product_id'], data['price'],
-                       data['title'], data['uploaded_at'], data['area'], data['category'], True))
+                       data['title'], data['uploaded_at'], data['area'], data['category'], True, data['product_link']))
         connection.commit()
 
 # 당근인 경우 카테고리
